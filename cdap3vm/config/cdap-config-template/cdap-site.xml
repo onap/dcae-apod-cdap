@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Copyright © 2014 Cask Data, Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+  -->
+<configuration>
+  <!-- 
+    Your site level configuration goes here 
+  -->
+<property>
+  <name>zookeeper.quorum</name>
+  <value>__HDP_ZOOKEEPER_QUORUM__/${root.namespace}</value>
+  <description>
+    ZooKeeper quorum string; specifies the ZooKeeper host:port;
+    substitute the quorum for the components shown here (FQDN1:2181,FQDN2:2181)
+  </description>
+</property>
+<property>
+  <name>router.server.address</name>
+  <value>__CDAP_ROUTER_HOST__</value>
+  <description>CDAP Router address to which CDAP UI connects</description>
+</property>
+<property>
+  <name>explore.enabled</name>
+  <value>false</value>
+  <description>Enable Explore functionality</description>
+</property>
+<property>
+  <name>enable.unrecoverable.reset</name>
+  <value>true</value>
+  <description>Needed for allowing deletion of namespaces</description>
+</property>
+<property>
+  <name>app.program.jvm.opts</name>
+  <value>-XX:MaxPermSize=128M ${twill.jvm.gc.opts} -Dhdp.version=__HDP_VERSION__ -Dspark.yarn.am.extraJavaOptions=-Dhdp.version=__HDP_VERSION__</value>
+  <description>Java options for all program containers</description>
+</property>
+
+<property>
+  <name>kafka.seed.brokers</name>
+  <value>__CDAP_KAFKA_HOST__:9092</value>
+  <description>
+    Comma-separated list of CDAP Kafka service brokers; for distributed CDAP,
+    replace with list of FQDN:port brokers
+  </description>
+</property>
+
+
+</configuration>
