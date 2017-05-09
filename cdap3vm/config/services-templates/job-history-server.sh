@@ -20,11 +20,13 @@
 
 # Job History Server
 
+# [173931] now running as __MAPRED_USER__
+
 ACTION="$1"
 
 case "$ACTION" in
   start|stop )
-    su "__HDFS_USER__" -c "__HDP_CURRENT_FOLDER__/hadoop-mapreduce-historyserver/sbin/mr-jobhistory-daemon.sh --config __HADOOP_CONF_DIR__ $ACTION historyserver" ;;
+    su "__MAPRED_USER__" -c "__HDP_CURRENT_FOLDER__/hadoop-mapreduce-historyserver/sbin/mr-jobhistory-daemon.sh --config __HADOOP_CONF_DIR__ $ACTION historyserver" ;;
   * )
     echo "Usage: $0 <start|stop>"
     exit -1 ;;

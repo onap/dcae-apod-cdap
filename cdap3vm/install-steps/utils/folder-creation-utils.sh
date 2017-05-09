@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # ============LICENSE_START==========================================
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
@@ -17,6 +15,8 @@
 # limitations under the License.
 # ============LICENSE_END============================================
 # ECOMP and OpenECOMP are trademarks and service marks of AT&T Intellectual Property.
+
+#!/bin/bash
 
 copy_hadoop_conf_files() {
    srcfolder=${HADOOP_CONF_FOLDER}/"$1"
@@ -151,6 +151,8 @@ inst_job_history_server() {
    run_service_setup_script job-history-setup-01-as-root.sh # no need for username then
    run_service_setup_script job-history-setup-02-as-hdfs.sh ${__HDFS_USER__}
    setup_hadoop_service_scripts job-history-server.sh  
+   # [173931] Start MapReduce History Server during Hadoop install
+   run_service_setup_script job-history-server-start.sh ${__MAPRED_USER__}
 }
 
 inst_cdap() {

@@ -139,7 +139,7 @@ process_hadoop_service_setup_scripts \
    resource-manager-start.sh node-manager-start.sh datanode-start.sh \
    job-history-setup-01-as-root.sh job-history-setup-02-as-hdfs.sh \
    datanode-start.sh hbase-master-start.sh hbase-regionserver-start.sh \
-   cdap-setup.sh cdap-start.sh
+   cdap-setup.sh cdap-start.sh job-history-server-start.sh
 
 chmod -R o+r ${HADOOP_SCRIPT_FOLDER}/..
 

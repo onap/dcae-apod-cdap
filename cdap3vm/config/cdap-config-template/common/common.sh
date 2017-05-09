@@ -15,11 +15,10 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# checks if there exists a PID that is already running. return 0 idempotently
-
 export JAVA_HOME=__JAVA_HOME__
 PATH=$PATH:__NODEJS_BIN__
 
+# checks if there exists a PID that is already running. return 0 idempotently
 cdap_check_before_start() {
   if [ -f ${pid} ]; then
     if kill -0 $(<${pid}) > /dev/null 2>&1; then
@@ -169,7 +168,10 @@ cdap_set_hbase() {
         hbasecompat="${CDAP_HOME}/hbase-compat-1.0/lib/*"
         ;;
       1.1*)
-        hbasecompat="$CDAP_HOME/hbase-compat-1.1/lib/*"
+        hbasecompat="${CDAP_HOME}/hbase-compat-1.1/lib/*"
+        ;;
+      1.2-cdh*)
+        hbasecompat="${CDAP_HOME}/hbase-compat-1.2-cdh5.7.0/lib/*"
         ;;
       *)
         echo "ERROR: Unknown/unsupported version of HBase found: ${HBASE_VERSION}"
@@ -207,7 +209,7 @@ cdap_set_classpath() {
 
   # In order to ensure that we can do hacks, need to make sure classpath is sorted
   # so that cdap jars are placed earlier in the classpath than twill or hadoop jars
-  COMP_LIB=$(find -L "${COMP_HOME}/lib" -type f | sort | tr '\n' ':')
+  COMP_LIB=$(find -L "${COMP_HOME}/lib" -type f 2>/dev/null | sort | tr '\n' ':')
 
   if [ -n "${HBASE_CP}" ]; then
     CP="${COMP_LIB}:${HBASE_CP}:${CCONF}/:${COMP_HOME}/conf/:${EXTRA_CLASSPATH}"
@@ -242,9 +244,16 @@ cdap_set_hive_classpath() {
         cdap_kinit || return 1
       fi
 
-      if [[ $(which hive 2>/dev/null) ]]; then
+      # Use ${HIVE_HOME} if set
+      if [ -n "${HIVE_HOME}" ]; then
+        HIVE_CMD=${HIVE_HOME}/bin/hive
+      else
+        HIVE_CMD=hive
+      fi
+
+      if [[ $(which ${HIVE_CMD} 2>/dev/null) ]]; then
         ERR_FILE=$(mktemp)
-        HIVE_VAR_OUT=$(hive -e 'set -v' 2>${ERR_FILE})
+        HIVE_VAR_OUT=$(${HIVE_CMD} -e 'set -v' 2>${ERR_FILE})
         __ret=$?
         HIVE_ERR_MSG=$(< ${ERR_FILE})
         rm ${ERR_FILE}
@@ -261,6 +270,7 @@ cdap_set_hive_classpath() {
         HIVE_HOME=${HIVE_HOME:-$(echo -e "${HIVE_VARS}" | grep '^env:HIVE_HOME=' | cut -d= -f2)}
         HIVE_CONF_DIR=${HIVE_CONF_DIR:-$(echo -e "${HIVE_VARS}" | grep '^env:HIVE_CONF_DIR=' | cut -d= -f2)}
         HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-$(echo -e "${HIVE_VARS}" | grep '^env:HADOOP_CONF_DIR=' | cut -d= -f2)}
+        HIVE_EXEC_ENGINE=${HIVE_EXEC_ENGINE:-$(echo -e "${HIVE_VARS}" | grep '^hive.execution.engine=' | cut -d= -f2)}
       fi
     fi
 
@@ -269,8 +279,46 @@ cdap_set_hive_classpath() {
     if [ -n "${HIVE_HOME}" -a -n "${HIVE_CONF_DIR}" -a -n "${HADOOP_CONF_DIR}" ]; then
       EXPLORE_CONF_FILES=$(ls -1dF ${HIVE_CONF_DIR}/* ${HADOOP_CONF_DIR}/* | sed -e '/\/$/d' | tr '\n' ':')
       EXPLORE_CLASSPATH=$(ls -1 ${HIVE_HOME}/lib/hive-exec-* ${HIVE_HOME}/lib/*.jar | tr '\n' ':')
+      if [ -n "${TEZ_HOME}" -a -n "${TEZ_CONF_DIR}" ]; then
+        # tez-site.xml also need to be passed to explore service
+        EXPLORE_CONF_FILES=${EXPLORE_CONF_FILES}:${TEZ_CONF_DIR}/tez-site.xml:
+      fi
+      if [[ "${HIVE_EXEC_ENGINE}" == "spark" ]]; then
+        # We require SPARK_HOME to be set for CDAP to include the Spark assembly JAR for Explore
+        cdap_set_spark || die "Unable to get SPARK_HOME, but default Hive engine is Spark"
+      fi
       export EXPLORE_CONF_FILES EXPLORE_CLASSPATH
     fi
+  fi
+}
+
+# Get SPARK_HOME
+cdap_set_spark() {
+  local readonly __saved_stty=$(stty -g 2>/dev/null)
+  # First, see if we're set to something sane
+  if [ -n "${SPARK_HOME}" -a -d "${SPARK_HOME}" ]; then
+    export SPARK_HOME
+    return 0 # SPARK_HOME is set, already
+  else
+    if [[ $(which spark-shell 2>/dev/null) ]]; then
+      ERR_FILE=$(mktemp)
+      SPARK_VAR_OUT=$(echo 'for ((key, value) <- sys.env) println (key + "=" + value); exit' | spark-shell --master local 2>${ERR_FILE})
+      __ret=$?
+      # spark-shell invocation above does not properly restore the stty.
+      stty ${__saved_stty}
+      SPARK_ERR_MSG=$(< ${ERR_FILE})
+      rm ${ERR_FILE}
+      if [ ${__ret} -ne 0 ]; then
+        echo "ERROR - While determining Spark home, failed to get Spark settings using: spark-shell --master local"
+        echo "stderr:"
+        echo "${SPARK_ERR_MSG}"
+        return 1
+      fi
+      SPARK_HOME=$(echo -e "${SPARK_VAR_OUT}" | grep ^SPARK_HOME= | cut -d= -f2)
+      export SPARK_HOME
+      return 0
+    fi
+    return 1
   fi
 }
 

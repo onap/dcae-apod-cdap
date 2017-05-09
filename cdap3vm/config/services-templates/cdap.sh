@@ -26,8 +26,9 @@ case "$ACTION" in
   start|stop|status )
     /etc/init.d/cdap-auth-server $ACTION
     /etc/init.d/cdap-kafka-server $ACTION
-    /etc/init.d/cdap-master $ACTION
+    # [173581] start router before master
     /etc/init.d/cdap-router $ACTION
+    /etc/init.d/cdap-master $ACTION
     /etc/init.d/cdap-ui $ACTION ;;
  * )
     echo "Usage: $0 <start|stop|status>"

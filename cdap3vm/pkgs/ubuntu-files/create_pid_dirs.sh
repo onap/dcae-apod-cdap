@@ -43,6 +43,7 @@ sudo chown yarn:hadoop /var/run/hadoop/yarn/yarn
 sudo mkdir -p -m0755 /var/run/hadoop/mapred
 sudo chown mapred:hadoop /var/run/hadoop/mapred
 
+# [173931] Not used
 # mapreduce:
-sudo mkdir -p -m0755 /var/run/hadoop/mapreduce
-sudo chown mapred:hadoop /var/run/hadoop/mapreduce
+# sudo mkdir -p -m0755 /var/run/hadoop/mapreduce
+# sudo chown mapred:hadoop /var/run/hadoop/mapreduce

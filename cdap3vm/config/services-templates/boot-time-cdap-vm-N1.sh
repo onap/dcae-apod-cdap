@@ -24,6 +24,8 @@ MAINDIR=__SERVICE_CONFIG_FOLDER__
 
 \. $MAINDIR/utility-scripts.sh
 
+# set umask expected for log creation
+umask 0022
 
 ACTION="$1"
 

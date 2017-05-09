@@ -57,7 +57,7 @@ __YARN_PID_DIR__=/var/run/hadoop/yarn
 #
 
 # Directory to store the MapReduce daemon logs.
-__MAPRED_LOG_DIR__=/opt/data/log/hadoop/mapred
+__MAPRED_LOG_DIR__=/opt/data/log/mapred
 
 # Directory to store the mapreduce jobhistory process ID.
 __MAPRED_PID_DIR__=/var/run/hadoop/mapred

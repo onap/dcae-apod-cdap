@@ -21,12 +21,41 @@
 # Default will be a production installation 
 # Any test installation requires passing arguments to different steps
 
-cd $(dirname $0)/install-steps
+umask 0022
+CDAPLOG=$(dirname $0)/cdap-hadoop-install.log
 
+(
+echo -n "### Start at: " 
+date
+
+cd $(dirname $0)/install-steps
+pwd
+
+echo
+echo '## 01-generate-host-ids-configs.sh'
 bash 01-generate-host-ids-configs.sh 
+
+echo
+echo '## 02-user-creation.sh'
 bash 02-user-creation.sh
+
 #bash 03-hadoop-rpms.sh
+
+echo
+echo '## install-hortonworks-hadoop.sh'
 bash install-hortonworks-hadoop.sh
+
+echo
+echo '## install-cdap-pkgs.sh'
 bash install-cdap-pkgs.sh
+
+echo
+echo '## 04-folder-creation.sh' 
 bash 04-folder-creation.sh 
+
+echo
+echo -n "### End at: " 
+date
+
+) 2>&1 | tee -a $CDAPLOG
 

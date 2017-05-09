@@ -68,4 +68,14 @@ chmod +x /etc/init.d/cdap-vm-services
 #
 update-rc.d cdap-vm-services defaults
 
+# Disable CDAP component init.d entries installed by Debian packages
+# [171525] Remove init.d run level links for CDAP processes
+#
+echo '### Disable CDAP component init.d entries installed by Debian packages:'
+for init in cdap-auth-server cdap-kafka-server cdap-master cdap-router cdap-ui
+ do echo Disabling $init...
+ echo update-rc.d -n -f $init remove
+ sudo update-rc.d -f $init remove
+done
+
 \. ./utils/cdap-nodetype-${NODETYPE}.sh

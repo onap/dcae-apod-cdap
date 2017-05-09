@@ -37,6 +37,7 @@ sudo apt-get -y update
 #
 sudo apt-cache search hadoop
 sudo apt-cache search hbase
+sudo apt-cache search spark
 sudo apt-cache search zookeeper
 
 ## Install HortonWorks Hadoop packages:
@@ -50,6 +51,7 @@ sudo JAVA_HOME=/opt/app/java/jdk/jdk170 apt-get -y install \
      hadoop-hdfs-zkfc hadoop-mapreduce hadoop-mapreduce-historyserver \
      hadoop-yarn hadoop-yarn-nodemanager \
      hbase hbase-master hbase-regionserver \
+     spark-master spark-python \
      zookeeper libhdfs0
 
 ## Fix file permissions for domain sockets

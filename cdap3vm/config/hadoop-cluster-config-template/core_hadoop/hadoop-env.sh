@@ -59,7 +59,8 @@ export HADOOP_SSH_OPTS="-o ConnectTimeout=5 -o SendEnv=HADOOP_CONF_DIR"
 export HADOOP_LOG_DIR=${HADOOP_LOG_MAIN}/$USER
 
 # History server logs
-export HADOOP_MAPRED_LOG_DIR=${HADOOP_LOG_MAIN}-mapreduce/$USER
+# [173931] now using __MAPRED_USER__ directory
+export HADOOP_MAPRED_LOG_DIR=${HADOOP_LOG_MAIN}/__MAPRED_USER__
 
 # Where log files are stored in the secure data environment.
 export HADOOP_SECURE_DN_LOG_DIR=${HADOOP_LOG_MAIN}/$HADOOP_SECURE_DN_USER
@@ -80,7 +81,8 @@ export HADOOP_PID_DIR=/var/run/hadoop/$USER
 export HADOOP_SECURE_DN_PID_DIR=/var/run/hadoop/$HADOOP_SECURE_DN_USER
 
 # History server pid
-export HADOOP_MAPRED_PID_DIR=/var/run/hadoop-mapreduce/$USER
+# [173931] now using __MAPRED_USER__ directory
+export HADOOP_MAPRED_PID_DIR=/var/run/hadoop/__MAPRED_USER__
 
 YARN_RESOURCEMANAGER_OPTS="-Dyarn.server.resourcemanager.appsummary.logger=INFO,RMSUMMARY"
 
@@ -123,3 +125,7 @@ export HADOOP_LIBEXEC_DIR=/usr/hdp/current/hadoop-client/libexec
 export JAVA_LIBRARY_PATH=${JAVA_LIBRARY_PATH}
 
 export HADOOP_OPTS="-Dhdp.version=$HDP_VERSION $HADOOP_OPTS"
+
+# [US171516] Fix Hadoop Spark config
+export SPARK_HOME="/usr/hdp/current/spark-historyserver/"
+
